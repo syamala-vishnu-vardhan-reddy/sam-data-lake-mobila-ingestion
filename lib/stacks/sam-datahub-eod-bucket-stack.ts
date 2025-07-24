@@ -25,13 +25,21 @@ export class SamDatahubEodBucketStack extends cdk.Stack {
     });
     glueTempBucket.grantReadWrite(glueJobRole);
 
+    // Asset for the Glue job script
+    const glueScriptAsset = new s3assets.Asset(this, 'GlueScriptAsset', {
+      path: path.join(__dirname, '../../scripts/sam-datahub-li-pos-eod-transactions-glue-qut.py'),
+    });
+
+    // Grant the Glue job role access to the script asset bucket
+    glueScriptAsset.bucket.grantRead(glueJobRole);
+
     // Glue Job definition (scriptLocation removed)
     new glue.CfnJob(this, 'SamDatahubLiPosEodTransactionsGlueQut', {
       name: 'sam-datahub-li-pos-eod-transactions-glue-qut',
       role: glueJobRole.roleArn,
       command: {
         name: 'glueetl',
-        // scriptLocation removed since .py file is not used
+        scriptLocation: `s3://${glueScriptAsset.s3BucketName}/${glueScriptAsset.s3ObjectKey}`,
         pythonVersion: '3',
       },
       glueVersion: '3.0',
