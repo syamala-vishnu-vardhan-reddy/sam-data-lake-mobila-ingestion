@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - npm install
+      - npm install --save-dev @types/node
+  build:
+    commands:
+      - npx tsc
+      - npx cdk synth
+      - npx cdk deploy --require-approval never
+
+artifacts:
+  files:
+    - '**/*' 
